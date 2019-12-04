@@ -1,0 +1,23 @@
+{
+  "sampleData": {
+    "237831fb-9152-4ece-9f6a-eb2b8f0ecbee": {
+      "payload": "sample_data/defaultbinarytype.json"
+    },
+    "97f209b5-fde1-451e-b420-8c618d4cfb0e": {
+      "payload": "sample_data/list_unknown.xml"
+    },
+    "7f8a8fed-4729-439f-ab09-7eda281d2765": {
+      "payload": "sample_data/parent.xml"
+    },
+    "2f72b9f3-63c8-48f2-9f5c-e17e2741b8c4": {
+      "payload": "sample_data/details.xml"
+    },
+    "cc486b66-e49a-4fcb-8934-13e7853450fd": {
+      "payload": "sample_data/list_unknown.csv"
+    },
+    "4edec208-c4be-4d1f-9398-f58f60e78db0": {
+      "payload": "sample_data/defaultbinarytype_1.dwl",
+      "vars-datavar": "sample_data/list_object.dwl"
+    }
+  }
+}

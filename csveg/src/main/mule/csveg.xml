@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ad7e101e-fa6f-4efb-a43e-52f82c0a1d52" >
+		<http:listener-connection host="0.0.0.0" port="8080" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="1190076c-cb10-49d0-8d7f-3c066aed71df" file="config/configuration.yaml" />
+	<configuration doc:name="Configuration" doc:id="7240e97d-9a76-4bb1-8342-4965f9cb253e" defaultErrorHandler-ref="error_handling_fileError_Handler" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="ef836a6e-1f48-4847-abda-adf5b7d3a8ac" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" database="customer1" />
+	</db:config>
+	<flow name="csvegFlow" doc:id="97105363-2b80-4f74-9751-85e807b92b18" >
+		<http:listener doc:name="Listener" doc:id="fd881831-debf-4caf-8135-5c5c0f12e1f0" config-ref="HTTP_Listener_config" path="exmp"/>
+		<db:select doc:name="Select" doc:id="f0b1c4b1-cda1-4dac-8bee-15b2481e2ee4" config-ref="Database_Config">
+			<db:sql >SELECT * FROM customer1.timesheet</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="3b23fc91-ca8a-4d77-8d92-98b7db138766" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

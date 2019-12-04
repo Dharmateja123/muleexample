@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="new" format="xml">
+      <types:example format="xml" element="parent" location="examples/new.xml"/>
+    </types:type>
+    <types:type name="uuidfile" format="xml">
+      <types:example format="xml" element="details" location="examples/details_59ae75db-bcfe-4779-ac36-bcfaf50b6d39"/>
+    </types:type>
+    <types:type name="csv" format="csv">
+      <types:shape format="weave" example="examples/emprecords.csv"><![CDATA[%dw 2.0
+
+type csv = Array<{|  firstname: String,   lastname: String,   empno: String,   status: String|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#7f8a8fed-4729-439f-ab09-7eda281d2765">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="new"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2f72b9f3-63c8-48f2-9f5c-e17e2741b8c4">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="uuidfile"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#97f209b5-fde1-451e-b420-8c618d4cfb0e"/>
+  <types:enrichment select="#2ff686d2-2f21-453c-bdab-b58c1d62d98f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="uuidfile"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#cc486b66-e49a-4fcb-8934-13e7853450fd">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="csv"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

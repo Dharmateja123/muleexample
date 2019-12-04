@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<parent>
+    <child type="reference">
+        <grandChild name="aaa" action="None">
+            <Attribute name="xxx">1</Attribute>
+            <grandChild name="bbb" action="None">
+                <Attribute name="xxx">1</Attribute>
+            </grandChild>
+            <grandChild name="ccc" action="None">
+                <Attribute name="xxx">1</Attribute>
+            </grandChild>
+        </grandChild>
+        <grandChild name="ddd" action="None">
+                <Attribute name="xxx">1</Attribute>
+        </grandChild>
+    </child>
+</parent>
