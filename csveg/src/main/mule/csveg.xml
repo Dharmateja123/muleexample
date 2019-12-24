@@ -1,29 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
-	xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:servicenow="http://www.mulesoft.org/schema/mule/servicenow"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
-http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/servicenow http://www.mulesoft.org/schema/mule/servicenow/current/mule-servicenow.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ad7e101e-fa6f-4efb-a43e-52f82c0a1d52" >
 		<http:listener-connection host="0.0.0.0" port="8080" />
 	</http:listener-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="1190076c-cb10-49d0-8d7f-3c066aed71df" file="config/configuration.yaml" />
 	<configuration doc:name="Configuration" doc:id="7240e97d-9a76-4bb1-8342-4965f9cb253e" defaultErrorHandler-ref="error_handling_fileError_Handler" />
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="ef836a6e-1f48-4847-abda-adf5b7d3a8ac" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" database="customer1" />
-	</db:config>
-	<flow name="csvegFlow" doc:id="97105363-2b80-4f74-9751-85e807b92b18" >
-		<http:listener doc:name="Listener" doc:id="fd881831-debf-4caf-8135-5c5c0f12e1f0" config-ref="HTTP_Listener_config" path="exmp"/>
-		<db:select doc:name="Select" doc:id="f0b1c4b1-cda1-4dac-8bee-15b2481e2ee4" config-ref="Database_Config">
-			<db:sql >SELECT * FROM customer1.timesheet</db:sql>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="3b23fc91-ca8a-4d77-8d92-98b7db138766" >
+	<servicenow:config name="ServiceNow_Config" doc:name="ServiceNow Config" doc:id="91482e46-c38b-4e93-83ee-d0cfc0fc3e2e" >
+		<servicenow:basic-connection username="admin" password="Dharmateja@123" serviceAddress="https://dev87889.service-now.com/" >
+			<servicenow:transport >
+				<servicenow:basic-auth-http-message-dispatcher-provider username="admin" password="Dharmateja@123" />
+			</servicenow:transport>
+		</servicenow:basic-connection>
+	</servicenow:config>
+	<flow name="csvegFlow2" doc:id="a02d7ccb-4ae1-4835-9d7c-1be504f53d87" >
+		<http:listener doc:name="Listener" doc:id="fdc49a07-a04c-4ea4-97f0-f30dfa184e53" config-ref="HTTP_Listener_config" path="file"/>
+		<file:list doc:name="List" doc:id="dded7990-0e19-4c91-9634-9dc482a2f1a3" directoryPath="C:\Users\818668\Desktop\files">
+			<file:matcher filenamePattern="*.csv" />
+		</file:list>
+		<ee:transform doc:name="Transform Message" doc:id="d5ab63f4-54f9-47cf-86c1-78dd8979aa19" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+ payload.typedAttributes.path]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:read doc:name="Read" doc:id="c3cf0b51-1c6f-423d-9499-72aee552dd67" path="#[payload[0]]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0cfbbd03-0b9b-47dc-aae0-4146b6e28697" message="==============================#[payload]"/>
+	</flow>
+	<flow name="csvegFlow1" doc:id="36ebb5b3-8a3e-4252-873a-af1601f6c015" >
+		<http:listener doc:name="Listener" doc:id="99692773-6b6e-4a3e-b443-95c431678a2c" config-ref="HTTP_Listener_config" path="invoke"/>
+		<ee:transform doc:name="Transform Message" doc:id="d7cb8761-54f6-4131-8e6b-a2bc585477f7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://www.service-now.com/incident
+---
+{
+	ns0#insert:{
+		comments:"please resolve immediately",
+		short_description:" cannot able to access salesforce",
+		state: "new",
+		assigned_to:"MuleSupportTeam"
+		
+		
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<servicenow:invoke service="incident" operation="insert" doc:name="Invoke" doc:id="d343fd81-298b-4ed2-8d0d-a09b804ad25b" config-ref="ServiceNow_Config">
+		</servicenow:invoke>
+		<logger level="INFO" doc:name="Logger" doc:id="28daa79f-f421-488a-8f97-9f0d72f4e64f" message="processing"/>
+		<ee:transform doc:name="Transform Message" doc:id="d76a942c-4b6e-4b92-a0a7-1f94f50408dd" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -31,5 +72,6 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0a50cb77-3d6f-43b7-aa20-a222f3addefb" message="flow is completed............................."/>
 	</flow>
 </mule>

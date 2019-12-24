@@ -1,0 +1,15 @@
+{
+  "APP_ID": "MULE-EH-100",
+  "APP_NAME": "ErrorHandlingProject",
+  "C_MAIL": "1",
+  "C_TICKET": "1",
+  "C_FILE": "1",
+  "EMAIL_IDS": "![m+XBwZdu5S09wrH+8P1iTg==]",
+  "TRANSACTION_ID": "c007d523-716e-4faa-a8d7-f3d24ffca2e6",
+  "CORRELATION_ID": "0.27957129892175214",
+  "ERROR_SEVERITY": "error from salesforce resolve quickly",
+  "ERROR_TIMESTAMP": "2019-12-18T17:16:54.411+05:30",
+  "FLOW_NAME": "globalerrrorhandlingError_Handler",
+  "ERROR_TYPE": "SALESFORCE:INVALID_REQUEST_DATA",
+  "PAYLOAD": "Invalid request data"
+}

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:servicenow="http://www.mulesoft.org/schema/mule/servicenow"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/servicenow http://www.mulesoft.org/schema/mule/servicenow/current/mule-servicenow.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<servicenow:config name="ServiceNow_Config" doc:name="ServiceNow Config" doc:id="e4334eeb-c452-4881-b494-bcdf3dd0d8e2" >
+		<servicenow:basic-connection username="admin" password="Dharmateja@123" serviceAddress="https://dev87889.service-now.com/" >
+			<servicenow:transport >
+				<servicenow:basic-auth-http-message-dispatcher-provider username="admin" password="Dharmateja@123" />
+			</servicenow:transport>
+		</servicenow:basic-connection>
+	</servicenow:config>
+	<error-handler name="globalerrrorhandlingError_Handler" doc:id="a0678198-35c1-4381-8cb5-b2c42677f756" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="be77c329-be07-48f7-ac5a-2eeccc70fbba" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="d61f8bad-68e3-40b8-97c6-3f76eba867c3" >
+				<ee:message >
+					<ee:set-payload resource="DataweaveFiles/ErrorMsg.dwl" />
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="9219adc7-7c32-44b8-aacf-cb59520ce3e9" name="InsertingFlow1"/>
+		</on-error-propagate>
+	</error-handler>
+	<flow name="InsertingFlow1" doc:id="af0fdfd3-6281-4572-a5a4-7b93fbff149a" >
+		<async doc:name="Async" doc:id="345c61a5-5810-40e2-9ea0-d33386d94f5a" >
+			<set-variable value="#[payload]" doc:name="Set Variable for storing payload" doc:id="381d1563-e67a-4ac5-9537-f9d9b48be7e0" variableName="data " />
+			<set-variable value='#[error.errorType.namespace ++ ":" ++ error.errorType.identifier]' doc:name="Set Variable to errortype" doc:id="926fd74b-3914-4455-a2c9-aba3f14fb2cb" variableName="err" />
+			<ee:transform doc:name="Transforming all fields" doc:id="2fa055fd-16e4-460b-be49-fc1683e4646f">
+			<ee:message>
+				<ee:set-payload resource="DataweaveFiles/Vardata.dwl" />
+			</ee:message>
+		</ee:transform>
+			<scatter-gather doc:name="Scatter-Gather" doc:id="83e671ce-cbca-4265-98b6-82fbb9c0672a" maxConcurrency="1">
+			<route>
+				<db:insert doc:name="Inserting into app_details" doc:id="74243748-525d-4134-859b-6f2efefc1d0a" config-ref="Database_Config">
+					<db:sql>INSERT INTO customer2.app_details  (APP_ID, APP_NAME, C_FILE, EMAIL_IDS, C_TICKET, C_MAIL)  VALUES  (:APP_ID, :APP_NAME, :C_FILE, :EMAIL_IDS, :C_TICKET, :C_MAIL)</db:sql>
+					<db:input-parameters><![CDATA[#[{
+	"APP_ID":vars.data.APP_ID,
+	"APP_NAME":vars.data.APP_NAME,
+	"C_FILE":vars.data.C_FILE,
+	"EMAIL_IDS":vars.data.EMAIL_IDS,
+	"C_TICKET":vars.data.C_TICKET,
+	"C_MAIL":vars.data.C_MAIL
+}]]]></db:input-parameters>
+				</db:insert>
+					<logger level="INFO" doc:name="Logger" doc:id="fce91912-272a-4d11-9811-27385e11a6a0" message="Values are inserted"/>
+			</route>
+			<route>
+				<db:insert doc:name="Inserting into error_details" doc:id="982fe787-858f-4428-8db5-e03f40c49210" config-ref="Database_Config">
+					<db:sql>INSERT INTO customer2.error_details (APP_ID, TRANSACTION_ID, CORRELATION_ID, ERROR_SEVERITY, ERROR_TIMESTAMP, FLOW_NAME,ERROR_TYPE,PAYLOAD)  VALUES  (:APP_ID, :TRANSACTION_ID, :CORRELATION_ID, :ERROR_SEVERITY, :ERROR_TIMESTAMP, :FLOW_NAME,:ERROR_TYPE,:PAYLOAD)</db:sql>
+					<db:input-parameters><![CDATA[#[{
+  "APP_ID":vars.data.APP_ID,
+  "TRANSACTION_ID":vars.data.TRANSACTION_ID ,
+  "CORRELATION_ID":vars.data.CORRELATION_ID,
+  "ERROR_SEVERITY":vars.data.ERROR_SEVERITY ,
+  "ERROR_TIMESTAMP":vars.data.ERROR_TIMESTAMP ,
+  "FLOW_NAME":vars.data.FLOW_NAME ,
+  "ERROR_TYPE": vars.err,
+  "PAYLOAD":vars.data.PAYLOAD
+}]]]></db:input-parameters>
+				</db:insert>
+					<logger level="INFO" doc:name="Logger" doc:id="225d0efb-9a2f-4a41-a5a5-c689a69fc964" message="values are inserted"/>
+			</route>
+				<route >
+					<file:write doc:name="Storing the error payload in file for Mail" doc:id="34652476-5fd7-4bbe-958f-f2ced39b7b6d" path="C:\Users\818668\AnypointStudio\studio-workspace\ErrorHandlingProject\src\test\resources\c_mail.txt" mode="APPEND" />
+					<logger level="INFO" doc:name="Logging the Mail payload" doc:id="b0446727-1339-4a37-9ab4-c3791310c6ce" message="The Mail payload sent successfully................................" />
+				</route>
+				<route >
+					<file:write doc:name="Storing the error payload into file" doc:id="27e3aea8-5590-499a-84bc-4af87fba9507" path="C:\Users\818668\AnypointStudio\studio-workspace\ErrorHandlingProject\src\test\resources\c_file.txt" mode="APPEND" />
+					<logger level="INFO" doc:name="Logging the file payload" doc:id="03a42254-12c5-49d9-bac1-194a72ca8fb5" message="The file payload stored successfully................................" />
+				</route>
+				<route >
+					<ee:transform doc:name="Transform Message" doc:id="f5036b1f-99f7-499f-a34d-d2db9cd595e9" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://www.service-now.com/incident
+---
+{
+	ns0#insert: {
+		comments: payload.FLOW_NAME as String,
+		short_description: payload.ERROR_TYPE as String,
+		assigned_to: "MuleSupport Team"
+	}
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<servicenow:invoke doc:name="Invoke" doc:id="204b6eeb-cb3a-4f9e-8d8f-37cdcb4f5b1c" config-ref="ServiceNow_Config" service="incident" operation="insert"/>
+					<logger level="INFO" doc:name="Logging the ticket to servicenow" doc:id="7ac99edd-f331-487d-a472-0683951cb143" message="The incident raised successfully............................................" />
+				</route>
+		</scatter-gather>
+			<logger level="INFO" doc:name="Logging the result" doc:id="a1ff55fe-e9cc-4c97-86e0-9030ea2802ce" message="completed ==========================#[payload]" />
+		</async>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ab16f69a-62f9-46ee-a3e3-49a165f486b6" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="293e2ee7-f965-4763-9ed8-7b3f1f612f12" message="Error Handled"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

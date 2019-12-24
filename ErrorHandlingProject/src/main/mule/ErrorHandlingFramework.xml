@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ab608135-6522-47a0-bec3-84dbe85d1350" >
+		<http:listener-connection host="localhost" port="8080" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b60115be-6c43-460f-9f34-e92adf222cef" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" database="customer2" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="bafd8538-89ae-4944-b894-f9f7cacc2e70" file="dev.properties" />
+	<configuration doc:name="Configuration" doc:id="12560b44-9c58-45af-b60a-74ccc5c4314e" defaultErrorHandler-ref="globalerrrorhandlingError_Handler" />
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="0d165313-05a2-4c78-9a0c-acc6696fa16b" >
+		<salesforce:cached-basic-connection username="voletidharma993@gmail.com" password="dharmateja93" securityToken="r9VR6LKipf7sOa50U4ouwtbk" />
+	</salesforce:sfdc-config>
+	<flow name="SalesforceFlow" doc:id="537e1a79-f5ed-4479-9235-e4d62c338f54" >
+		<http:listener doc:name="Listener " doc:id="c766f836-3475-497f-9eda-5099dd002a4a" config-ref="HTTP_Listener_config" path="${http.path1}"/>
+		<salesforce:query doc:name="Fetching data from Salesforce " doc:id="032ae19e-e468-4240-954e-face871ec4cb" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT EmpId__c,EmpName__c,EmpGrade__c,EmpStatus__c,EmpAccno__c,EmpIfsccode__c,EmpBankname__c,EmpSalary__c  FROM  Hcm</salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transforming the payload" doc:id="00f63331-db65-41e2-bdd7-eb167d6434b2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logging the given payload" doc:id="679a5e1a-423f-491f-9c31-13feea634538" message="=========#[payload]"/>
+	</flow>
+	<flow name="DatabaseFlow" doc:id="bf7afad6-b58d-4c5d-bf15-dd7fe2cc3557" >
+		<http:listener doc:name="Listener" doc:id="2f9599e5-789b-45b0-ad24-af43aea02265" config-ref="HTTP_Listener_config" path="${http.path2}"/>
+		<db:select doc:name="Fetching data from DB" doc:id="7ade4c86-1e76-4f8c-9f87-9c13f580d9b2" config-ref="Database_Config">
+			<db:sql >SELECT * FROM customer1.employeedetails</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transforming the payload" doc:id="7d4b2100-269e-45e8-9d8c-f3bd3aff2615" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-attributes>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logging the given payload" doc:id="f5a07328-6585-4658-9c41-2aa167969b86" message="=========================#[payload]"/>
+	</flow>
+	<flow name="FileFlow" doc:id="6519391f-7c4a-49e5-a45b-5bb374ec9bb5" >
+		<http:listener doc:name="Listener" doc:id="1590ecaa-b04d-40b5-88c6-0567f676d053" config-ref="HTTP_Listener_config" path="${http.path3}"/>
+		<file:list doc:name="List of files from folder" doc:id="f968c3e8-3130-450f-bf46-e4555f09c828" directoryPath="C:\Users\818668\Desktop\files">
+			<file:matcher filenamePattern="*.csv"/>
+		</file:list>
+		<ee:transform doc:name="Transforming the payload" doc:id="c7738b88-25fa-4e50-b5fa-a6a4f584867b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[ %dw 2.0
+output application/java
+---
+ payload.typedAttributes.path
+
+	
+	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:read doc:name="Reading the given payload" doc:id="56c7e610-f414-448a-af63-3fdf2a588896" path="#[payload[0]]"/>
+		<logger level="INFO" doc:name="Logging the final payload" doc:id="2d5b233c-f009-438a-8199-3ba8b0e52b3f" message="========================#[payload]"/>
+	</flow>
+</mule>
