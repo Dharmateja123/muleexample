@@ -95,10 +95,10 @@ ns ns0 http://www.service-now.com/incident
 		</scatter-gather>
 			<logger level="INFO" doc:name="Logging the result" doc:id="a1ff55fe-e9cc-4c97-86e0-9030ea2802ce" message="completed ==========================#[payload]" />
 		</async>
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ab16f69a-62f9-46ee-a3e3-49a165f486b6" type="ANY">
-				<logger level="INFO" doc:name="Logger" doc:id="293e2ee7-f965-4763-9ed8-7b3f1f612f12" message="Error Handled"/>
-			</on-error-continue>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8c0e9757-aabb-406b-bacc-3fbae6d0d64d" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="f505dc8f-9dcd-4be8-a672-babb6ee75fc8" message="Error Handled"/>
+			</on-error-propagate>
 		</error-handler>
 	</flow>
 </mule>
